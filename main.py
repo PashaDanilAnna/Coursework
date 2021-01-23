@@ -5,8 +5,6 @@ import chardet
 import os
 import codecs
 
-import json as json
-
 def f(x):
     return 2/(1+np.exp(-x)) - 1
 
@@ -103,12 +101,6 @@ def load_data():
 
 def get_ASCII_fron_str(str):
     return sum(list(str.encode('utf-8')))
-
-def get_array_ASCII_from_str(str):
-    array_str = []
-    for i in range(len(str)):
-        array_str.append(get_ASCII_fron_str(str[i]))
-    return array_str
 
 def go_forward(inp):
     sum = np.dot(W[0], inp)
