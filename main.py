@@ -16,8 +16,8 @@ def df(x):
 
 W = []
 outs = []
-count_inputs = 3
-count_neuron_in_layers = np.array([2, 2, 2, 1])
+count_inputs = 5
+count_neuron_in_layers = np.array([2,4,5,3,2,1])
 count_layers = len(count_neuron_in_layers)
 
 def save_weighs():
