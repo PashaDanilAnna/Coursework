@@ -1,3 +1,25 @@
+import numpy as np
+import random as rand
+import io
+import chardet
+import os
+import codecs
+
+import json as json
+
+def f(x):
+    return 2/(1+np.exp(-x)) - 1
+
+def df(x):
+    return 0.5*(1 + x)*(1 - x)
+
+
+W = []
+outs = []
+count_inputs = 3
+count_neuron_in_layers = np.array([2, 2, 2, 1])
+count_layers = len(count_neuron_in_layers)
+
 def save_weighs():
     my_file = open("weights.txt", 'w')
     temp_W = []
@@ -87,6 +109,81 @@ def get_array_ASCII_from_str(str):
     for i in range(len(str)):
         array_str.append(get_ASCII_fron_str(str[i]))
     return array_str
+
+def go_forward(inp):
+    sum = np.dot(W[0], inp)
+    #out = np.array([f(x) for x in sum])
+    outs[0] = np.array([f(x) for x in sum])
+
+    # центральные
+    for i in range(1,count_layers - 1):
+        sum = np.dot(W[i],outs[i-1])
+        outs[i] = np.array([f(x) for x in sum])
+
+    sum = np.dot(W[count_layers-1], outs[count_layers-2])
+    y = f(sum)
+    return (y, outs)
+
+def p_l(delta):
+    if len(delta) == 1:
+        return delta[0]
+    else:
+        return delta
+    
+def train(epoch):
+    #global W2, W1
+    global W
+    lmd = 0.01      # шаг обучения
+    N = 0       # число итераций при обучении
+    while N < 1 or N > 10000000:
+        N = int(input("Введите количество итераций: "))
+    count = len(epoch)
+    for z in range(N):
+        if z % 10000 == 0:
+           print("Прошло " + str(z) + " итераций из " + str(N))
+        x = epoch[np.random.randint(0,count)]   # случайный выбор входного сигнала из обучающей выборки
+        y, outs = go_forward(x[0:count_inputs])             # прямой проход по НС и вычисление выходных значений нейронов
+        e = y - x[-1]                           # ошибка
+        temp = e*df(y)                         # локальный градиент
+        delta = temp[0]
+        for j in range(len(W[count_layers-1])):
+            W[count_layers-1][j] = W[count_layers-1][j] - lmd * delta * outs[count_layers-2][j]
+
+        # центральный
+        delta2 = delta
+        for i in range(count_layers-2,0,-1):
+            delta3 = []
+            if not isinstance(delta2, float):
+                for j in range(len(W[i-1])):
+                    temp = 0
+                    delta3.append([])
+                    for k in range(len(W[i])):
+                        temp = delta2[k] * W[i][k][j] + temp
+                    delta3[j] = temp * df(outs[i-1][j])
+            else:
+                delta3 = p_l(W[i+1]) * delta2 * df(outs[i])
+            delta2 = p_l(delta3)
+
+            for j in range(len(W[i])):
+                for k in range(len(W[i][j])):
+                    W[i][j][k] = W[i][j][k] - lmd * delta2[j] * outs[i-1][j]    # корректировка веса j связи i слоя
+
+        delta3 = []
+        for j in range(len(W[0])):
+            temp = 0
+            delta3.append([])
+            for k in range(len(W[1])):
+                temp = delta2[k] * W[1][k][j] + temp
+            delta3[j] = temp * df(outs[0][j])
+        delta2 = p_l(delta3)
+
+        # корректировка связей первого слоя
+        for j in range(len(W[0])):
+            for k in range(len(W[0][j])):
+                summa = np.sum(x[0:3])
+                W[0][j][k] = W[0][j][k] - summa * delta2[j] * lmd
+
+epoch = []
 
     
 if __name__ == '__main__':
