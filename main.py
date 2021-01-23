@@ -78,6 +78,16 @@ def load_data():
     for i in range(len(epoch)):
         for j in range(count_inputs):
             epoch[i][j] = float(get_ASCII_from_str(epoch[i][j]))
+
+def get_ASCII_fron_str(str):
+    return sum(list(str.encode('utf-8')))
+
+def get_array_ASCII_from_str(str):
+    array_str = []
+    for i in range(len(str)):
+        array_str.append(get_ASCII_fron_str(str[i]))
+    return array_str
+
     
 if __name__ == '__main__':
     l1 = 0
