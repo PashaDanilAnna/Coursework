@@ -6,10 +6,10 @@ import os
 import codecs
 
 def f(x):
-    return 2/(1+np.exp(-x)) - 1
+    return 1/(1+np.exp(-x))
 
 def df(x):
-    return 0.5*(1 + x)*(1 - x)
+    return np.exp(-x)/((1+np.exp(-x))**2)
 
 
 W = []
